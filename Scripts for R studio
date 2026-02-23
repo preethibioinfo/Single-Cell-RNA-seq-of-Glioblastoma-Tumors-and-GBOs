@@ -1,0 +1,62 @@
+05_deseq2_analysis.R
+
+# Load libraries
+library(DESeq2)
+library(ggplot2)
+library(pheatmap)
+
+# Import counts
+counts <- read.delim("counts/gene_counts.txt", comment.char="#")
+rownames(counts) <- counts$Geneid
+counts <- counts[,7:ncol(counts)]
+
+# Metadata
+sample_info <- data.frame(
+  row.names = colnames(counts),
+  condition = c("Tumor","GBO_2wk","GBO_8wk")  # modify accordingly
+)
+
+# DESeq2 object
+dds <- DESeqDataSetFromMatrix(countData = counts,
+                              colData = sample_info,
+                              design = ~ condition)
+
+dds <- DESeq(dds)
+
+# Results
+res <- results(dds, alpha=0.05)
+
+# Order by p-value
+resOrdered <- res[order(res$pvalue),]
+
+# Save results
+write.csv(as.data.frame(resOrdered),
+          file="results/DESeq2_results.csv")
+
+06_volcano_plot.R
+library(ggplot2)
+
+res <- read.csv("results/DESeq2_results.csv")
+
+ggplot(res, aes(x=log2FoldChange, y=-log10(padj))) +
+  geom_point(alpha=0.4) +
+  theme_minimal() +
+  xlab("Log2 Fold Change") +
+  ylab("-Log10 Adjusted P-value")
+
+ggsave("figures/Volcano_plot.png")
+
+07_heatmap.R
+library(pheatmap)
+
+vsd <- vst(dds, blind=FALSE)
+topgenes <- head(order(rowVars(assay(vsd)), decreasing=TRUE),50)
+
+pheatmap(assay(vsd)[topgenes,],
+         scale="row",
+         show_rownames=FALSE)
+
+ggsave("figures/Heatmap_top50.png")
+
+sessionInfo.txt
+sessionInfo()
