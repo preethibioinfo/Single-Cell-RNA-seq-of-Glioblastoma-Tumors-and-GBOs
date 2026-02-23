@@ -1,0 +1,88 @@
+01_download_data.sh
+
+sudo apt update
+
+# SRA toolkit
+sudo apt install sra-toolkit
+
+# QC
+sudo apt install fastqc
+sudo apt install multiqc
+
+# Trimming
+sudo apt install trim-galore
+
+# Alignment
+sudo apt install hisat2
+
+# BAM tools
+sudo apt install samtools
+
+# Counting
+sudo apt install subread
+
+#!/bin/bash
+
+mkdir -p raw_fastq
+cd raw_fastq
+
+# Example sample
+prefetch GSM4216905
+fasterq-dump GSM4216905 --split-files
+
+# Repeat for other GSM IDs
+
+chmod +x scripts/01_download_data.sh
+bash scripts/01_download_data.sh
+
+
+02_qc_trim.sh
+
+#!/bin/bash
+
+mkdir -p trimmed_fastq
+
+# Quality check
+fastqc *.fastq
+
+# Trim adapters
+for sample in *.fastq
+do
+    trim_galore $sample -o ../trimmed_fastq/
+done
+
+# Aggregate QC
+multiqc .
+
+03_alignment.sh
+
+#!/bin/bash
+
+mkdir -p alignments
+
+# Build genome index (only once)
+hisat2-build genome.fa genome_index
+
+# Align
+for sample in ../trimmed_fastq/*_trimmed.fq
+do
+    base=$(basename $sample _trimmed.fq)
+    hisat2 -x genome_index -U $sample -S alignments/${base}.sam
+done
+
+# Convert SAM → BAM
+for sam in alignments/*.sam
+do
+    samtools view -bS $sam | samtools sort -o ${sam%.sam}.bam
+done
+
+04_featureCounts.sh
+
+#!/bin/bash
+
+mkdir -p counts
+
+featureCounts -a annotation.gtf \
+-o counts/gene_counts.txt \
+alignments/*.bam
+
