@@ -1,3 +1,107 @@
+# RNA-seq Differential Expression Analysis
+
+This repository contains a reproducible RNA-seq workflow for differential gene expression analysis in cancer transcriptomic datasets.
+
+---
+
+## 📊 Dataset Information
+
+**Source:** NCBI GEO  
+**Organism:** Homo sapiens  
+**Data Type:** Bulk RNA-seq  
+**Genome Build:** GRCh38  
+**Annotation:** GENCODE v38  
+
+Raw sequencing data can be downloaded using the SRA Toolkit.  
+For reproducibility, download scripts are provided in the `scripts/` folder.
+
+---
+
+## 📁 Repository Structure
+
+RNA-seq/
+├── README.md  
+├── data/  
+│   ├── sample_metadata.csv  
+│   └── gene_counts_processed.csv  
+├── scripts/  
+│   ├── 01_download_data.sh  
+│   ├── 02_DESeq2_analysis.R  
+│   ├── 03_PCA_analysis.R  
+│   ├── 04_volcano_plot.R  
+│   ├── 05_GO_enrichment.R  
+│   ├── 06_KEGG_enrichment.R  
+│   └── 07_Heatmap_top50.R  
+├── results/scripts
+│   ├── DESeq2_results.csv  
+│   ├── significant_genes_FDR0.05.csv  
+│   └── normalized_counts.csv  
+├── figures/scripts
+│   ├── PCA_plot.png  
+│   ├── Volcano_plot.png  
+│   └── Heatmap_top50.png  
+└── sessionInfo.txt  
+
+---
+
+## 🧪 Experimental Design
+
+The study compares transcriptional changes between tumor samples and treatment/timepoint conditions.
+
+Metadata includes:
+- Sample ID  
+- Patient ID  
+- Condition  
+- Timepoint  
+
+See `data/sample_metadata.csv`.
+
+---
+
+## 📌 Statistical Thresholds
+
+- Adjusted p-value (FDR, Benjamini–Hochberg) < 0.05  
+- |log2 Fold Change| > 1  
+- Low-count filtering: row sum > 10  
+- Variance Stabilizing Transformation (VST) used for PCA  
+
+---
+
+## 🔬 Analysis Workflow
+
+1. Download raw data (SRA Toolkit)
+2. Quality control (FastQC)
+3. Alignment (HISAT2)
+4. Gene counting (featureCounts)
+5. Differential expression (DESeq2)
+6. Functional enrichment (clusterProfiler)
+7. Visualization (PCA, Volcano plot, Heatmap)
+
+---
+
+## 🔁 Reproducibility
+
+- Analysis performed in R  
+- Package versions documented in `sessionInfo.txt`  
+- Modular script-based execution  
+- All outputs generated programmatically  
+
+To reproduce:
+
+1. Place count matrix and metadata inside `data/`
+2. Run scripts sequentially from `scripts/`
+3. Outputs will be saved in `results/` and `figures/`
+
+---
+
+## 👩‍🔬 Author
+
+D. Preethi  
+M.Sc. Biochemistry  
+Stem Cell Biology Laboratory  
+Cancer & Epigenetics Research
+
+
 RNAseq_GSE421690/
 ├── README.md
 ├── data/
